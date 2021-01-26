@@ -1,14 +1,16 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 define("common", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.CancellationToken = exports.delay = void 0;
     function delay(ms) {
         return __awaiter(this, void 0, void 0, function* () {
             if (typeof window !== "undefined") {
@@ -30,6 +32,7 @@ define("common", ["require", "exports"], function (require, exports) {
 define("random", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Random = void 0;
     class Random {
         constructor(seed) {
             if (typeof seed === "undefined") {
@@ -49,6 +52,7 @@ define("random", ["require", "exports"], function (require, exports) {
 define("lib/clustering", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KMeans = exports.Vector = void 0;
     class Vector {
         constructor(values, weight = 1) {
             this.values = values;
@@ -151,6 +155,7 @@ define("lib/clustering", ["require", "exports"], function (require, exports) {
 define("lib/colorconversion", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.rgb2lab = exports.lab2rgb = exports.hslToRgb = exports.rgbToHsl = void 0;
     /**
       * Converts an RGB color value to HSL. Conversion formula
       * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
@@ -269,6 +274,7 @@ define("lib/colorconversion", ["require", "exports"], function (require, exports
 define("settings", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Settings = exports.ClusteringColorSpace = void 0;
     var ClusteringColorSpace;
     (function (ClusteringColorSpace) {
         ClusteringColorSpace[ClusteringColorSpace["RGB"] = 0] = "RGB";
@@ -298,6 +304,7 @@ define("settings", ["require", "exports"], function (require, exports) {
 define("structs/typedarrays", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.BooleanArray2D = exports.Uint8Array2D = exports.Uint32Array2D = void 0;
     class Uint32Array2D {
         constructor(width, height) {
             this.width = width;
@@ -351,6 +358,7 @@ define("structs/typedarrays", ["require", "exports"], function (require, exports
 define("colorreductionmanagement", ["require", "exports", "common", "lib/clustering", "lib/colorconversion", "settings", "structs/typedarrays", "random"], function (require, exports, common_1, clustering_1, colorconversion_1, settings_1, typedarrays_1, random_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ColorReducer = exports.ColorMapResult = void 0;
     class ColorMapResult {
     }
     exports.ColorMapResult = ColorMapResult;
@@ -445,7 +453,7 @@ define("colorreductionmanagement", ["require", "exports", "common", "lib/cluster
                     vec.tag = rgb;
                     vectors[vIdx++] = vec;
                 }
-                const random = new random_1.Random(settings.randomSeed);
+                const random = new random_1.Random(settings.randomSeed === 0 ? new Date().getTime() : settings.randomSeed);
                 // vectors of all the unique colors are built, time to cluster them
                 const kmeans = new clustering_1.KMeans(vectors, settings.kMeansNrOfClusters, random);
                 let curTime = new Date().getTime();
@@ -606,6 +614,7 @@ define("colorreductionmanagement", ["require", "exports", "common", "lib/cluster
 define("structs/point", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Point = void 0;
     class Point {
         constructor(x, y) {
             this.x = x;
@@ -629,6 +638,7 @@ define("structs/point", ["require", "exports"], function (require, exports) {
 define("structs/boundingbox", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.BoundingBox = void 0;
     class BoundingBox {
         constructor() {
             this.minX = Number.MAX_VALUE;
@@ -648,6 +658,7 @@ define("structs/boundingbox", ["require", "exports"], function (require, exports
 define("facetmanagement", ["require", "exports", "structs/point"], function (require, exports, point_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.FacetResult = exports.Facet = exports.PathPoint = exports.OrientationEnum = void 0;
     var OrientationEnum;
     (function (OrientationEnum) {
         OrientationEnum[OrientationEnum["Left"] = 0] = "Left";
@@ -770,6 +781,7 @@ define("facetmanagement", ["require", "exports", "structs/point"], function (req
 define("facetBorderSegmenter", ["require", "exports", "common", "structs/point", "facetmanagement"], function (require, exports, common_2, point_2, facetmanagement_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.FacetBorderSegmenter = exports.FacetBoundarySegment = exports.PathSegment = void 0;
     /**
      *  Path segment is a segment of a border path that is adjacent to a specific neighbour facet
      */
@@ -1091,6 +1103,7 @@ define("facetBorderSegmenter", ["require", "exports", "common", "structs/point",
 define("facetBorderTracer", ["require", "exports", "common", "structs/point", "structs/typedarrays", "facetmanagement"], function (require, exports, common_3, point_3, typedarrays_2, facetmanagement_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.FacetBorderTracer = void 0;
     class FacetBorderTracer {
         /**
          *  Traces the border path of the facet from the facet border points.
@@ -1593,6 +1606,7 @@ define("facetBorderTracer", ["require", "exports", "common", "structs/point", "s
 define("lib/fill", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.fill = void 0;
     function fill(x, y, width, height, visited, setFill) {
         // at this point, we know array[y,x] is clear, and we want to move as far as possible to the upper-left. moving
         // up is much more important than moving left, so we could try to make this smarter by sometimes moving to
@@ -1680,6 +1694,7 @@ define("lib/fill", ["require", "exports"], function (require, exports) {
 define("facetReducer", ["require", "exports", "colorreductionmanagement", "common", "facetCreator", "structs/typedarrays"], function (require, exports, colorreductionmanagement_1, common_4, facetCreator_1, typedarrays_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.FacetReducer = void 0;
     class FacetReducer {
         /**
          *  Remove all facets that have a pointCount smaller than the given number.
@@ -1970,6 +1985,7 @@ define("facetReducer", ["require", "exports", "colorreductionmanagement", "commo
 define("facetCreator", ["require", "exports", "common", "lib/fill", "structs/boundingbox", "structs/point", "structs/typedarrays", "facetmanagement"], function (require, exports, common_5, fill_1, boundingbox_1, point_4, typedarrays_4, facetmanagement_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.FacetCreator = void 0;
     class FacetCreator {
         /**
          *  Constructs the facets with its border points for each area of pixels of the same color
@@ -2150,6 +2166,7 @@ define("facetCreator", ["require", "exports", "common", "lib/fill", "structs/bou
 define("lib/datastructs", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PriorityQueue = exports.Map = void 0;
     class Map {
         constructor() {
             this.obj = {};
@@ -2401,6 +2418,7 @@ define("lib/datastructs", ["require", "exports"], function (require, exports) {
 define("lib/polylabel", ["require", "exports", "lib/datastructs"], function (require, exports, datastructs_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.pointToPolygonDist = exports.polylabel = void 0;
     function polylabel(polygon, precision = 1.0) {
         // find the bounding box of the outer ring
         let minX = Number.MAX_VALUE;
@@ -2547,6 +2565,7 @@ define("lib/polylabel", ["require", "exports", "lib/datastructs"], function (req
 define("facetLabelPlacer", ["require", "exports", "common", "lib/polylabel", "structs/boundingbox", "facetCreator"], function (require, exports, common_6, polylabel_1, boundingbox_2, facetCreator_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.FacetLabelPlacer = void 0;
     class FacetLabelPlacer {
         /**
          *  Determines where to place the labels for each facet. This is done by calculating where
@@ -2638,6 +2657,7 @@ define("facetLabelPlacer", ["require", "exports", "common", "lib/polylabel", "st
 define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "common", "facetBorderSegmenter", "facetBorderTracer", "facetCreator", "facetLabelPlacer", "facetmanagement", "facetReducer", "gui", "structs/point"], function (require, exports, colorreductionmanagement_2, common_7, facetBorderSegmenter_1, facetBorderTracer_1, facetCreator_3, facetLabelPlacer_1, facetmanagement_4, facetReducer_1, gui_1, point_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.GUIProcessManager = exports.ProcessResult = void 0;
     class ProcessResult {
     }
     exports.ProcessResult = ProcessResult;
@@ -3024,6 +3044,7 @@ define("guiprocessmanager", ["require", "exports", "colorreductionmanagement", "
 define("gui", ["require", "exports", "common", "guiprocessmanager", "settings"], function (require, exports, common_8, guiprocessmanager_1, settings_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.loadExample = exports.downloadSVG = exports.downloadPNG = exports.downloadPalettePng = exports.updateOutput = exports.process = exports.parseSettings = exports.log = exports.timeEnd = exports.time = void 0;
     let processResult = null;
     let cancellationToken = new common_8.CancellationToken();
     const timers = {};
@@ -3250,6 +3271,7 @@ define("gui", ["require", "exports", "common", "guiprocessmanager", "settings"],
 define("lib/clipboard", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Clipboard = void 0;
     // From https://stackoverflow.com/a/35576409/694640
     /**
      * image pasting into canvas
